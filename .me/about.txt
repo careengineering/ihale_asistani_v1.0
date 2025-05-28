@@ -1,0 +1,61 @@
+Proje Adı: İhale Asistanı
+
+Kapsamı: Herkese açık bu nedenle ücretsiz model ve araçlar kullanılmalı.
+
+Dosya Mimarisi: structure.txt
+
+Yapay Zeka Modeli: data/raw içerisinde birçok doc, docx, pdf, txt, html vb veriler var. Bu dosyalarda ihale ile ilgili kurallar ve şartlar yer alıyor. 
+İhale “Bir işin kimin tarafından daha ucuz yapılacağının anlaşılması için istekliler arasında açılan fiyat kırma işi; eksiltme.” Şeklinde tanımlanmaktadır. 
+4 çeşit ihale çeşidi vardır. Mal, Hizmet, Yapım ve Danışmanlık. Her birinin kendi içinde farklılaşan mevzuatları vardır. 
+Başlığında Mal, Hizmet, Yapım ve Danışmanlık kelimesi bulunmayan mevzuatlar tüm ihalelerde geçerlidir. Bu nedenle sorunun hangi konu bazında aranacağını selecttion vb düğmeleri ile seçtireceğiz ki ilgili mevzuta aransın.
+Kanun, Yönetmelik, Tebliğ ve Esaslar içerisinde mevzuatın amacı, kapsamı, dayanağı ve tanımlar yer almaktadır. Farklı bölümlerde farklı konular ve kurallar anlatılmaktadır. 
+Kik kararları ise bu mevzuatların uygulanması sırasında düzenleyici karar olarak belirlenen konulardır. Metinden önce çoğunlukla gündem konusu belirtilir. Toplantı no gündem no katılan üye sayısı gibi bilgiler gereksizdir. Ama atıfta bulunurken karar tarihi ve karar no belirtilmelidir. 
+Dikkat edilmesi gereken şeyler;
+1.	Tüm kanunlarda yürütme yada yürürlük başlıklı maddeden sonrasını almana gerek yok. O bölümde kanunun değiştiği tarihler var modelin şu anda bilmesi gereken şeyler değil. 
+2.	Geçici madde olarak tanımlananlar önemli olabilir ihmal etme.
+3.	klasörler içerisinde Ek şeklinde adlandırılan dosyalar olabilir onları ihmal edebilirsin 
+4.	Bazı belgelerin sonlarında altbilgisinde standart form yazan belgeler bulunur bunlarıda ihmal edebilirsin. Bunlar örnek belgeleri anlatmaktadır.
+5.	Genel Şartnameler önemlidir ve dikkate alınmalıdır. Onlarda ayrı kategori olarak adlandırılabilir 
+6.	Kik kararlarıda yorumlar ve bilgiler için önemlidir.
+7. Normlar hiyerarşisinde sıralama Kanun Yönetmelik Tebliğ Kik Kararları Esaslar ve Şartnameler olarak düşünülebilir.
+
+
+Amaç: Kullanıcı ihale ile ilgili sorular sorsun entera yada gönder tuşuna bastığında , model soru ile ilgili mevzuat maddelerini mevzuat adı, madde numarası ve ilgili kısmını göstererek paylaşsın. 
+Gerekli açıklamaları ve izahları yaptıktan sonra kendi yorumunuda eklesin. Gelen cevap kullanıcı tarafından puanlandırılabilsin 4 ve 5 puan alan cevaplar, benzer sorular geldiğinde kullanılabilsin. sorular tüm soru ve cevapları kaydedilsin. Puanlar ve alaka düzeyler vs. 
+kullanıcılar doğrudan mevzuattaki kelimeler yerine eşanlamlılarını kullanabilir bunu göz önünde bulundurmalısın.
+
+
+ app klasörü içerisinde yer alan - main.py, 
+ 
+ src klasöründe yer alan - model.py, retriever.py, embedder.py ve data_processing.py
+ 
+ data klasörü içerisinde yer alan - EsAnlamlilar.csv
+
+dosyalarını bu sohbete ekledim. Mevcut dosya yapımı ve kodlarımı incele. Yaptığım açıklamalar doğrultusunda sistemin sağlıklı bir şekilde çalışmasını sağla. Şu anda model basit bir soruya yanıt bulunamadı cevabı veriyor.
+
+Sistemin çalışma prensibinin şu şekilde olmasını istiyorum. 
+
+ÖRNEK:
+
+Soru : "diploma iş deneyim belgesi yerine geçer mi?" (diploma, mezuniyet, mezuniyet belgesi gibi eşanlamlı kelimeler olabilir)
+
+Kaynaklar: 
+Kamu İhale Kanunu Madde 62:
+"...h) (Değişik: 20/11/2008-5812/24 md.) İş deneyimi bulunmayan mühendis veya mimarların, aldıkları lisans eğitimine uygun yapım işi ihalelerine başvurularında, toplam süresi onbeş yılı geçmemek kaydıyla mezuniyetlerinden sonra geçen her yıl, yüzyirmiikibinüçyüzseksenyedi Yeni Türk Lirası (İkimilyondokuzyüzaltmışbirbinyediyüzaltmışiki Türk Lirası)* olarak hesaplanmak üzere 10 uncu madde kapsamındaki benzer iş deneyimi olarak dikkate alınır. Bu süre iş deneyimi bulunan mimar ve mühendisler için uygulanmaz. Bu bent kapsamında elde edilen deneyim mühendis ve mimarın beş yıldır en az % 51 hissesine sahip olduğu  tüzel kişiler tarafından da kullanılabilir. ...."
+
+Yapım İşleri İhaleleri Yönetmeliği Madde 39:
+"... (11) (Değişik: RG-3/7/2009-27277; Değişik: RG-7/6/2014-29023, yürürlük: 10/6/2014) Tüzel kişi tarafından iş deneyimini göstermek üzere, en az beş yıldır % 51 veya daha fazla hissesine sahip mimar veya mühendis ortağının mezuniyet belgesinin sunulması durumunda; ticaret ve sanayi odası/ticaret odası bünyesinde bulunan ticaret sicil memurlukları veya (Ek ibare: 12/06/2015-29384 R.G./1. md, Mülga ibare: 13/06/2019-30800 RG/ 4. md., yürürlük: 23/06/2019) yeminli mali müşavir ya da serbest muhasebeci mali müşavir tarafından, ilk ilan veya davet tarihinden sonra düzenlenen ve düzenlendiği tarihten geriye doğru son beş yıldır kesintisiz olarak bu şartın korunduğunu gösteren belgenin sunulması zorunludur.
+(12) Mezuniyet belgelerinin iş deneyimini tevsik için sunulması durumunda; mezuniyetten sonra geçen sürenin onbeş yıldan fazlasının değerlendirmeye alınabilmesi için, başvuru veya teklif kapsamında mezuniyet belgesi sahibine ait yapım işine ilişkin bir iş deneyim belgesinin sunulması zorunludur..."
+
+Yapım İşleri İhaleleri Yönetmeliği Madde 48:
+"...(8) Mühendis veya mimarların, aldıkları lisans eğitimine uygun yapım işleri ihalelerinde, iş deneyimi olarak mezuniyet belgelerini sunmaları durumunda;
+a) İş deneyimi bulunmayan mühendis veya mimarların; toplam süresi onbeş yılı geçmemek kaydıyla mezuniyetlerinden sonra geçen her yıl, Kanunun 62 nci maddesinin birinci fıkrasının (h) bendinde belirtilen tutar kadar, 
+b) İş deneyimi bulunan mühendis veya mimarların; onbeş yıllık sınırlamaya tabi tutulmaksızın, mezuniyetlerinden sonra geçen her yıl Kanunun 62 nci maddesinin birinci fıkrasının (h) bendinde belirtilen tutar kadar, 
+benzer iş deneyimi olarak dikkate alınır..."
+
+
+Cevap: Yukarıda yer alan mevzuat hükümleri doğrultusunda diplomanın iş deneyim belgesi yerine belirli koşullar dahilinde geçebileceği belirtilmektedir.
+
+Puanlama:
+1...2...3....4...5
+

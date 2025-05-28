@@ -8,8 +8,7 @@ class ResponseGenerator:
             "question-answering",
             model=model_name,
             tokenizer=model_name,
-            device=0 if self.device.type == "cuda" else -1,
-            model_kwargs={"low_cpu_mem_usage": True}
+            device=0 if self.device.type == "cuda" else -1
         )
 
     def generate_answer(self, question, context, max_context_length=512):

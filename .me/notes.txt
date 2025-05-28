@@ -1,0 +1,38 @@
+pip install virtualenv
+virtualenv .venv 
+		
+
+#belirli versiyon için
+py -3.11 -m venv .venv
+
+Mac için
+source .venv/bin/activate
+Windows
+.\.venv\Scripts\activate.bat
+
+
+
+deactivate
+
+
+pip install -r requirements.txt
+pip install PyPDF2 sentence-transformers faiss-cpu python-docx beautifulsoup4 textract transformers torch numpy scikit-learn
+
+
+req yaratma
+pip freeze > requirements.txt
+
+
+bash
+
+chmod +x run_project.sh
+./run_project.sh
+
+
+
+.\.venv\Scripts\activate.bat
+python src\data_preprocessing.py
+python src\embedder.py
+streamlit run app/main.py --server.fileWatcherType none --server.port 8501
+streamlit run app/main.py --server.fileWatcherType none --server.port 8501 > streamlit.log 2>&1
+type streamlit.log

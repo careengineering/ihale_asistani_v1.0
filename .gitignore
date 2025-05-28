@@ -1,0 +1,76 @@
+# Python Sanal Ortamı
+.venv/
+venv/
+
+# Veri Dosyaları
+#data/raw/
+#data/processed/
+#data/embeddings/
+#data/interactions/
+
+#Python Derleme ve Geçici Dosyalar
+pycache/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.so
+
+#Geçici ve Dönüşüm Dosyaları
+temp/
+*.bak
+*.swp
+*~
+*.tmp
+*.docx.converted
+
+#Büyük ve İkili Dosyalar
+*.faiss
+*.bin
+*.idx
+
+#Hassas veya Geliştiriciye Özgü Dosyalar
+.env
+*.local
+*.secret
+config.ini
+credentials.json
+*.key
+*.pem
+
+#IDE/Editör Dosyaları
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+#MacOS ve İşletim Sistemi Dosyaları
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+#Streamlit ve Diğer Geçici Dosyalar
+.streamlit/
+*.log
+*.cache
+*.sqlite
+*.db
+
+#Bağımlılık Kilitleme Dosyaları (Opsiyonel)
+Pipfile.lock
+poetry.lock
+
+# Test ve Hata Ayıklama Dosyaları
+*.prof
+*.coverage
+coverage.xml
+nosetests.xml
+pytest_cache/
+
+
+# Notes
+# .me/

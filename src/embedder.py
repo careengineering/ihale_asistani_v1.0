@@ -1,49 +1,92 @@
-import json
-from sentence_transformers import SentenceTransformer
 import faiss
-import torch
+import json
 import numpy as np
+from sentence_transformers import SentenceTransformer
+import re
+import torch
+import pandas as pd
 
-class Embedder:
-    def __init__(self, model_name="distiluse-base-multilingual-cased-v2"):
+class Retriever:
+    def __init__(self, index_path, metadata_path, model_name="distiluse-base-multilingual-cased-v2", synonym_file="data/EsAnlamlilar.csv"):
+        self.model = SentenceTransformer(model_name, device="cuda" if torch.cuda.is_available() else "cpu")
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"Embedder Device: {self.device}")  # Cihazı doğrulamak için
-        self.model = SentenceTransformer(model_name, device=self.device)
-    
-    def embed_texts(self, texts):
-        try:
-            embeddings = self.model.encode(texts, convert_to_tensor=True, device=self.device, batch_size=16)
-            return embeddings.cpu().numpy()
-        except Exception as e:
-            print(f"Hata: Metinler vektörleştirilemedi. {e}")
-            raise
-    
-    def save_embeddings(self, texts, output_index_path="data/embeddings/mevzuat_embeddings.faiss", output_metadata_path="data/embeddings/mevzuat_metadata.json"):
-        try:
-            # Metinleri küçük gruplar halinde işleyerek hafıza kullanımını optimize etme
-            batch_size = 500
-            embeddings = []
-            for i in range(0, len(texts), batch_size):
-                batch = texts[i:i+batch_size]
-                batch_embeddings = self.embed_texts(batch)
-                embeddings.append(batch_embeddings)
-            embeddings = np.vstack(embeddings)
-            
-            dimension = embeddings.shape[1]
-            index = faiss.IndexFlatL2(dimension)
-            index.add(embeddings)
-            faiss.write_index(index, output_index_path)
-            metadata = [{"text": text} for text in texts]
-            with open(output_metadata_path, 'w', encoding='utf-8') as f:
-                json.dump(metadata, f, ensure_ascii=False, indent=4)
-            print(f"Embeddings kaydedildi: {output_index_path}, Metadata kaydedildi: {output_metadata_path}")
-        except Exception as e:
-            print(f"Hata: Vektörleştirme başarısız. {e}")
-            raise
+        print(f"Retriever Device: {self.device}")  # Cihazı doğrulamak için
+        self.index = faiss.read_index(index_path)
+        with open(metadata_path, 'r', encoding='utf-8') as f:
+            self.metadata = json.load(f)
+        faiss.omp_set_num_threads(4)
 
-if __name__ == "__main__":
-    with open("data/processed/mevzuat_chunks.json", 'r', encoding='utf-8') as f:
-        chunks = json.load(f)
-    texts = [chunk["text"] for chunk in chunks]
-    embedder = Embedder()
-    embedder.save_embeddings(texts)
+        # Eşanlamlılar dosyasını yükle (opsiyonel)
+        self.synonym_dict = self.load_synonyms(synonym_file) if synonym_file else {}
+
+    def load_synonyms(self, synonym_file):
+        """Eşanlamlılar dosyasını okur ve bir sözlük oluşturur."""
+        try:
+            df = pd.read_csv(synonym_file, encoding='utf-8')
+            # Sütun isimlerini kontrol et ve uyarla
+            if 'Kelime' in df.columns and 'Eşanlamlılar' in df.columns:
+                word_col, syn_col = 'Kelime', 'Eşanlamlılar'
+            elif 'word' in df.columns and 'synonyms' in df.columns:
+                word_col, syn_col = 'word', 'synonyms'
+            else:
+                raise ValueError("CSV dosyasında 'Kelime' ve 'Eşanlamlılar' veya 'word' ve 'synonyms' sütunları bulunamadı.")
+            
+            synonym_dict = {}
+            for _, row in df.iterrows():
+                word = row[word_col].strip().lower()
+                synonyms = [syn.strip().lower() for syn in row[syn_col].split(',')]
+                synonym_dict[word] = synonyms
+                # Her eşanlamlıyı da ana kelimeye bağla (çift yönlü eşleşme)
+                for syn in synonyms:
+                    if syn not in synonym_dict:
+                        synonym_dict[syn] = [word] + [s for s in synonyms if s != syn]
+            print(f"Eşanlamlılar yüklendi: {len(synonym_dict)} kelime.")
+            return synonym_dict
+        except Exception as e:
+            print(f"Hata: Eşanlamlılar dosyası yüklenemedi. {e}")
+            return {}
+
+    def expand_query(self, query):
+        """Sorgudaki kelimeleri eşanlamlılarıyla genişletir."""
+        if not self.synonym_dict:
+            return query  # Eşanlamlılar yoksa orijinal sorguyu döndür
+        words = query.lower().split()
+        expanded_words = []
+        for word in words:
+            if word in self.synonym_dict:
+                expanded_words.extend(self.synonym_dict[word])
+            expanded_words.append(word)
+        expanded_query = " ".join(set(expanded_words))  # Tekrarları kaldır
+        print(f"Genişletilmiş sorgu: {expanded_query}")
+        return expanded_query
+
+    def clean_text(self, text):
+        text = re.sub(r'[^\w\s.,;:-çğışöüÇĞİŞÖÜ]', ' ', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+
+    def retrieve(self, query, top_k=5, max_distance=0.7, ihale_type="Genel"):
+        try:
+            # Sorguyu eşanlamlılarla genişlet
+            expanded_query = self.expand_query(query)
+            query_embedding = self.model.encode([self.clean_text(expanded_query)], convert_to_tensor=False)
+            distances, indices = self.index.search(query_embedding, top_k)
+            results = []
+            for i, (distance, idx) in enumerate(zip(distances[0], indices[0])):
+                if distance > max_distance:
+                    continue
+                metadata = self.metadata[idx]
+                if ihale_type != "Genel" and metadata.get("ihale_type") != ihale_type:
+                    continue
+                results.append({
+                    "text": self.clean_text(metadata["text"]),
+                    "mevzuat_name": metadata["mevzuat_name"],
+                    "distance": float(distance),
+                    "ihale_type": metadata.get("ihale_type", "Genel"),
+                    "kik_date": metadata.get("kik_date"),
+                    "kik_number": metadata.get("kik_number")
+                })
+            return results[:top_k]
+        except Exception as e:
+            print(f"Hata: Arama yapılamadı. {e}")
+            return []

@@ -1,0 +1,25 @@
+ihale_asistani_v1.0
+├── LICENSE
+├── README.md
+├── .gitignore
+├── requirements.txt
+├── app
+│   ├── __init__.py
+│   └── main.py
+├── config.yaml
+├── data
+│   ├── __init__.py
+│   ├── EsAnlamlilar.csv
+│   ├── download_mevzuat
+│   │   ├── mevzuat.xlsx
+│   │   └── mevzuat_indir.py
+│   ├── embeddings
+│   ├── processed
+│   └── raw
+└── src
+    ├── __init__.py
+    ├── __pycache__
+    ├── data_preprocessing.py
+    ├── embedder.py
+    ├── model.py
+    └── retriever.py

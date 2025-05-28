@@ -1,4 +1,10 @@
 import streamlit as st
+import sys
+import os
+
+# src dizinini Python yoluna ekle
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from src.retriever import Retriever
 from src.model import ResponseGenerator
 
@@ -21,7 +27,8 @@ def initialize_models():
     retriever = Retriever(
         index_path="data/embeddings/mevzuat_embeddings.faiss",
         metadata_path="data/embeddings/mevzuat_metadata.json",
-        model_name="distiluse-base-multilingual-cased-v2"
+        model_name="distiluse-base-multilingual-cased-v2",
+        synonym_file="data/EsAnlamlilar.csv"
     )
     generator = ResponseGenerator(model_name="savasy/bert-base-turkish-squad")
     return retriever, generator
