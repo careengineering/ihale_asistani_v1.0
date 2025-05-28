@@ -36,3 +36,10 @@ python src\embedder.py
 streamlit run app/main.py --server.fileWatcherType none --server.port 8501
 streamlit run app/main.py --server.fileWatcherType none --server.port 8501 > streamlit.log 2>&1
 type streamlit.log
+
+
+alternatif
+
+python -c "from src.data_preprocessing import preprocess_raw_mevzuat; preprocess_raw_mevzuat('data/raw', 'data/processed')"
+python -c "from src.embedder import generate_embeddings_from_processed; generate_embeddings_from_processed('data/processed', 'data/embeddings/ihale_embeddings.pkl')"
+streamlit run app/streamlit_app.py

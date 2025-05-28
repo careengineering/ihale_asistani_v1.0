@@ -1,92 +1,32 @@
-import faiss
+import os
 import json
-import numpy as np
+import pickle
+from typing import List, Dict
 from sentence_transformers import SentenceTransformer
-import re
-import torch
-import pandas as pd
 
-class Retriever:
-    def __init__(self, index_path, metadata_path, model_name="distiluse-base-multilingual-cased-v2", synonym_file="data/EsAnlamlilar.csv"):
-        self.model = SentenceTransformer(model_name, device="cuda" if torch.cuda.is_available() else "cpu")
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        print(f"Retriever Device: {self.device}")  # Cihazı doğrulamak için
-        self.index = faiss.read_index(index_path)
-        with open(metadata_path, 'r', encoding='utf-8') as f:
-            self.metadata = json.load(f)
-        faiss.omp_set_num_threads(4)
+model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
-        # Eşanlamlılar dosyasını yükle (opsiyonel)
-        self.synonym_dict = self.load_synonyms(synonym_file) if synonym_file else {}
 
-    def load_synonyms(self, synonym_file):
-        """Eşanlamlılar dosyasını okur ve bir sözlük oluşturur."""
-        try:
-            df = pd.read_csv(synonym_file, encoding='utf-8')
-            # Sütun isimlerini kontrol et ve uyarla
-            if 'Kelime' in df.columns and 'Eşanlamlılar' in df.columns:
-                word_col, syn_col = 'Kelime', 'Eşanlamlılar'
-            elif 'word' in df.columns and 'synonyms' in df.columns:
-                word_col, syn_col = 'word', 'synonyms'
-            else:
-                raise ValueError("CSV dosyasında 'Kelime' ve 'Eşanlamlılar' veya 'word' ve 'synonyms' sütunları bulunamadı.")
-            
-            synonym_dict = {}
-            for _, row in df.iterrows():
-                word = row[word_col].strip().lower()
-                synonyms = [syn.strip().lower() for syn in row[syn_col].split(',')]
-                synonym_dict[word] = synonyms
-                # Her eşanlamlıyı da ana kelimeye bağla (çift yönlü eşleşme)
-                for syn in synonyms:
-                    if syn not in synonym_dict:
-                        synonym_dict[syn] = [word] + [s for s in synonyms if s != syn]
-            print(f"Eşanlamlılar yüklendi: {len(synonym_dict)} kelime.")
-            return synonym_dict
-        except Exception as e:
-            print(f"Hata: Eşanlamlılar dosyası yüklenemedi. {e}")
-            return {}
+def generate_embeddings_from_processed(processed_dir: str, output_path: str):
+    corpus = []
+    metadata = []
 
-    def expand_query(self, query):
-        """Sorgudaki kelimeleri eşanlamlılarıyla genişletir."""
-        if not self.synonym_dict:
-            return query  # Eşanlamlılar yoksa orijinal sorguyu döndür
-        words = query.lower().split()
-        expanded_words = []
-        for word in words:
-            if word in self.synonym_dict:
-                expanded_words.extend(self.synonym_dict[word])
-            expanded_words.append(word)
-        expanded_query = " ".join(set(expanded_words))  # Tekrarları kaldır
-        print(f"Genişletilmiş sorgu: {expanded_query}")
-        return expanded_query
+    for filename in os.listdir(processed_dir):
+        if filename.endswith(".json"):
+            with open(os.path.join(processed_dir, filename), "r", encoding="utf-8") as f:
+                items = json.load(f)
+                for item in items:
+                    corpus.append(item["icerik"])
+                    metadata.append({
+                        "mevzuat_adi": item["mevzuat_adi"],
+                        "madde_no": item["madde_no"],
+                        "icerik": item["icerik"]
+                    })
 
-    def clean_text(self, text):
-        text = re.sub(r'[^\w\s.,;:-çğışöüÇĞİŞÖÜ]', ' ', text)
-        text = re.sub(r'\s+', ' ', text).strip()
-        return text
+    print(f"[INFO] Embedding {len(corpus)} segments...")
+    embeddings = model.encode(corpus, show_progress_bar=True, convert_to_numpy=True)
 
-    def retrieve(self, query, top_k=5, max_distance=0.7, ihale_type="Genel"):
-        try:
-            # Sorguyu eşanlamlılarla genişlet
-            expanded_query = self.expand_query(query)
-            query_embedding = self.model.encode([self.clean_text(expanded_query)], convert_to_tensor=False)
-            distances, indices = self.index.search(query_embedding, top_k)
-            results = []
-            for i, (distance, idx) in enumerate(zip(distances[0], indices[0])):
-                if distance > max_distance:
-                    continue
-                metadata = self.metadata[idx]
-                if ihale_type != "Genel" and metadata.get("ihale_type") != ihale_type:
-                    continue
-                results.append({
-                    "text": self.clean_text(metadata["text"]),
-                    "mevzuat_name": metadata["mevzuat_name"],
-                    "distance": float(distance),
-                    "ihale_type": metadata.get("ihale_type", "Genel"),
-                    "kik_date": metadata.get("kik_date"),
-                    "kik_number": metadata.get("kik_number")
-                })
-            return results[:top_k]
-        except Exception as e:
-            print(f"Hata: Arama yapılamadı. {e}")
-            return []
+    with open(output_path, "wb") as f:
+        pickle.dump({"embeddings": embeddings, "metadata": metadata}, f)
+
+    print(f"[INFO] Embeddings saved to {output_path}")

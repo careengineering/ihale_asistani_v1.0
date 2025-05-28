@@ -1,27 +1,23 @@
-import torch
-from transformers import pipeline
+from typing import List, Dict
 
-class ResponseGenerator:
-    def __init__(self, model_name="savasy/bert-base-turkish-squad"):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.qa_pipeline = pipeline(
-            "question-answering",
-            model=model_name,
-            tokenizer=model_name,
-            device=0 if self.device.type == "cuda" else -1
-        )
+def generate_answer(retrieved_docs: List[Dict], user_question: str) -> str:
+    response = []
 
-    def generate_answer(self, question, context, max_context_length=512):
-        try:
-            context = context[:max_context_length]
-            result = self.qa_pipeline({
-                "question": question,
-                "context": context
-            })
-            answer = result["answer"].strip()
-            if not answer or len(answer) < 3:
-                return "Üzgünüz, soruya uygun bir cevap bulunamadı."
-            return f"{answer.capitalize()}."
-        except Exception as e:
-            print(f"Hata: Cevap üretilemedi. {e}")
-            return "Üzgünüz, soruya uygun bir cevap üretilemedi."
+    response.append("\nSoru: " + user_question)
+    response.append("\n\nİlgili Mevzuat Maddeleri:\n")
+
+    for doc in retrieved_docs:
+        mevzuat = doc.get("mevzuat_adi", "")
+        madde = doc.get("madde_no", "")
+        icerik = doc.get("icerik", "")
+        sim = doc.get("similarity", 0)
+
+        response.append(f"📘 {mevzuat} - Madde {madde} (Benzerlik: {sim:.2f})\n{icerik}\n")
+
+    response.append("\n📌 Açıklama:\n")
+    response.append("Yukarıda belirtilen mevzuatlara göre, sorunuzla ilişkili olan maddeler yukarıda listelenmiştir. Bu maddeler çerçevesinde değerlendirme yapılabilir.")
+
+    response.append("\n\nLütfen aşağıdaki şekilde puanlama yapınız (1-5):")
+    response.append("\n1 - İlgisiz | 2 - Kısmen Alakalı | 3 - Orta | 4 - İyi | 5 - Çok İyi")
+
+    return "\n".join(response)
