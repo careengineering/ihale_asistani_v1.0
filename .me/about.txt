@@ -31,7 +31,7 @@ kullanıcılar doğrudan mevzuattaki kelimeler yerine eşanlamlılarını kullan
  
  data klasörü içerisinde yer alan - EsAnlamlilar.csv
 
-dosyalarını bu sohbete ekledim. Mevcut dosya yapımı ve kodlarımı incele. Yaptığım açıklamalar doğrultusunda sistemin sağlıklı bir şekilde çalışmasını sağla. Şu anda model basit bir soruya yanıt bulunamadı cevabı veriyor.
+dosyalarını codes.txt içerisinde bu sohbete ekledim. Mevcut dosya yapımı ve kodlarımı incele. Yaptığım açıklamalar doğrultusunda sistemin sağlıklı bir şekilde çalışmasını sağla. Şu anda model basit bir soruya yanıt bulunamadı cevabı veriyor.
 
 Sistemin çalışma prensibinin şu şekilde olmasını istiyorum. 
 
