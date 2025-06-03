@@ -1,24 +1,30 @@
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from typing import List, Dict
 
-load_dotenv()
-client = OpenAI()
+# Use google/mt5-small for Turkish text generation
+tokenizer = AutoTokenizer.from_pretrained("google/mt5-small")
+model = AutoModelForSeq2SeqLM.from_pretrained("google/mt5-small")
 
-def generate_answer(question: str) -> str:
-    prompt = (
-        "Aşağıdaki kullanıcı sorusunu, Türk ihale mevzuatına uygun şekilde, "
-        "resmi ve açık bir dille cevapla.\n\n"
-        f"Soru: {question}\n\nCevap:"
-    )
+def generate_answer(question: str, retrieved_docs: List[Dict]) -> str:
+    # Construct a prompt that includes the question and relevant document excerpts
+    prompt = f"Soru: {question}\n\nİlgili Mevzuat:\n"
+    for doc in retrieved_docs:
+        mevzuat = doc.get("mevzuat_adi", "Bilinmiyor")
+        madde = doc.get("madde_no", "—")
+        icerik = doc.get("icerik", "")[:500]  # Limit content length to avoid token overflow
+        prompt += f"{mevzuat} - Madde {madde}:\n{icerik}\n\n"
+    prompt += "Yukarıdaki mevzuat bilgilerine dayanarak soruya yanıt ver ve bir açıklama yap."
 
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  # veya "gpt-4"
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.2,
-            max_tokens=500
+        inputs = tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True)
+        outputs = model.generate(
+            **inputs,
+            max_new_tokens=150,
+            do_sample=True,
+            temperature=0.7,
+            top_p=0.9
         )
-        return response.choices[0].message.content.strip()
+        answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return answer
     except Exception as e:
-        return f"[GPT cevabı alınamadı]: {e}"
+        return f"[Yorum üretilemedi]: {e}"

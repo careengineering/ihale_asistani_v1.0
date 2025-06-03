@@ -3,13 +3,12 @@ import re
 import json
 import fitz  # PyMuPDF
 import docx
-import pandas as pd 
 from bs4 import BeautifulSoup
+import pandas as pd
 from typing import List, Dict
 
 
 def load_synonyms(file_path: str) -> Dict[str, List[str]]:
-    import pandas as pd
     df = pd.read_csv(file_path)
     synonyms = {}
     for _, row in df.iterrows():
@@ -18,17 +17,15 @@ def load_synonyms(file_path: str) -> Dict[str, List[str]]:
             synonyms[word] = list(set(values) - {word})
     return synonyms
 
-
 def expand_question_with_synonyms(question: str, synonyms: Dict[str, List[str]]) -> List[str]:
     words = question.lower().split()
     expanded = set([question.lower()])
     for i, word in enumerate(words):
         if word in synonyms:
             for syn in synonyms[word]:
-                new_words = words[:i] + [syn] + words[i + 1:]
+                new_words = words[:i] + [syn] + words[i+1:]
                 expanded.add(' '.join(new_words))
     return list(expanded)
-
 
 def extract_text_from_file(file_path: str) -> str:
     ext = os.path.splitext(file_path)[1].lower()
@@ -43,21 +40,17 @@ def extract_text_from_file(file_path: str) -> str:
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
             soup = BeautifulSoup(f, "html.parser")
             return soup.get_text()
-    else:
-        return ""
+    return ""
 
 
 def extract_text_from_pdf(file_path: str) -> str:
     doc = fitz.open(file_path)
-    text = ""
-    for page in doc:
-        text += page.get_text()
-    return text
+    return "\n".join([page.get_text() for page in doc])
 
 
 def extract_text_from_docx(file_path: str) -> str:
     doc = docx.Document(file_path)
-    return "\n".join([para.text for para in doc.paragraphs])
+    return "\n".join([p.text for p in doc.paragraphs])
 
 
 def segment_law_text(content: str, mevzuat_adi: str) -> List[Dict]:
@@ -66,10 +59,12 @@ def segment_law_text(content: str, mevzuat_adi: str) -> List[Dict]:
     segments = []
 
     if not matches:
-        # Hiç madde bulunamadıysa tüm içerik tek madde gibi kabul edilir
+        madde_no = "Genel"
+        if "karar no" in content.lower():
+            madde_no = "Kurul Kararı"
         return [{
             "mevzuat_adi": mevzuat_adi,
-            "madde_no": "1",
+            "madde_no": madde_no,
             "icerik": content.strip()
         }]
 
@@ -91,24 +86,18 @@ def clean_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-import pandas as pd  # dosyanın başına ekle
-
-def preprocess_raw_mevzuat(raw_dir: str, output_dir: str, log_path: str = "data/logs/preprocess_log.xlsx"):
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+def preprocess_raw_mevzuat(raw_dir: str, output_dir: str, log_path="data/logs/preprocess_log.xlsx"):
+    os.makedirs(output_dir, exist_ok=True)
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
 
     log_data = []
 
     for root, _, files in os.walk(raw_dir):
         for filename in files:
-            file_path = os.path.join(root, filename)
+            path = os.path.join(root, filename)
             ext = os.path.splitext(filename)[1].lower()
-
             if ext not in [".pdf", ".docx", ".txt", ".html"]:
                 continue
-
-            print(f"[INFO] İşleniyor: {file_path}")
 
             base_name = os.path.basename(filename)
             mevzuat_adi = (
@@ -122,51 +111,24 @@ def preprocess_raw_mevzuat(raw_dir: str, output_dir: str, log_path: str = "data/
             )
 
             try:
-                content = extract_text_from_file(file_path)
-                if not content or len(content.strip()) < 100:
-                    log_data.append({
-                        "Dosya Adı": filename,
-                        "Mevzuat Adı": mevzuat_adi,
-                        "Madde Sayısı": 0,
-                        "Durum": "Başarısız",
-                        "Gerekçe": "İçerik boş veya çok kısa"
-                    })
+                content = extract_text_from_file(path)
+                if not content or len(content) < 100:
+                    log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": 0, "Durum": "Başarısız", "Gerekçe": "İçerik çok kısa"})
                     continue
 
                 segments = segment_law_text(content, mevzuat_adi)
-                cleaned_segments = [{**seg, "icerik": clean_text(seg["icerik"])} for seg in segments]
+                cleaned = [{**s, "icerik": clean_text(s["icerik"])} for s in segments]
 
-                if cleaned_segments:
-                    out_file = os.path.join(output_dir, f"{mevzuat_adi}.json")
-                    with open(out_file, "w", encoding="utf-8") as f:
-                        json.dump(cleaned_segments, f, ensure_ascii=False, indent=2)
-
-                    log_data.append({
-                        "Dosya Adı": filename,
-                        "Mevzuat Adı": mevzuat_adi,
-                        "Madde Sayısı": len(cleaned_segments),
-                        "Durum": "Başarılı",
-                        "Gerekçe": ""
-                    })
+                if cleaned:
+                    with open(os.path.join(output_dir, f"{mevzuat_adi}.json"), "w", encoding="utf-8") as f:
+                        json.dump(cleaned, f, ensure_ascii=False, indent=2)
+                    log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": len(cleaned), "Durum": "Başarılı", "Gerekçe": ""})
                 else:
-                    log_data.append({
-                        "Dosya Adı": filename,
-                        "Mevzuat Adı": mevzuat_adi,
-                        "Madde Sayısı": 0,
-                        "Durum": "Başarısız",
-                        "Gerekçe": "Hiç madde bulunamadı"
-                    })
+                    log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": 0, "Durum": "Başarısız", "Gerekçe": "Hiç madde bulunamadı"})
 
             except Exception as e:
-                log_data.append({
-                    "Dosya Adı": filename,
-                    "Mevzuat Adı": mevzuat_adi,
-                    "Madde Sayısı": 0,
-                    "Durum": "Başarısız",
-                    "Gerekçe": f"Hata: {str(e)}"
-                })
+                log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": 0, "Durum": "Hata", "Gerekçe": str(e)})
 
-    # Log verisini Excel'e yaz
     df = pd.DataFrame(log_data)
     df.to_excel(log_path, index=False)
-    print(f"[✅] Ön işleme tamamlandı. Log dosyası: {log_path}")
+    print(f"[✅] Ön işleme tamamlandı. Log: {log_path}")

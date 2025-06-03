@@ -14,19 +14,18 @@ def load_embeddings(path: str):
 
 
 
-def retrieve_top_k(question_variants: List[str], embeddings: np.ndarray, metadata: List[Dict], k: int = 3) -> List[Dict]:
+def retrieve_top_k(question_variants, embeddings, metadata, k=3):
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+
+    model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
     question_embeddings = model.encode(question_variants, convert_to_numpy=True)
     avg_question_embedding = np.mean(question_embeddings, axis=0)
 
     similarities = np.dot(embeddings, avg_question_embedding) / (
-        np.linalg.norm(embeddings, axis=1) * np.linalg.norm(avg_question_embedding) + 1e-10
+        np.linalg.norm(embeddings, axis=1) * np.linalg.norm(avg_question_embedding)
     )
     top_k_indices = np.argsort(similarities)[-k:][::-1]
 
-    results = []
-    for idx in top_k_indices:
-        entry = metadata[idx].copy()
-        entry["similarity"] = float(similarities[idx])
-        results.append(entry)
-
-    return results
+    top_k_items = [metadata[i] for i in top_k_indices if similarities[i] > 0.3]  # filtreleme
+    return top_k_items

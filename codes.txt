@@ -1,0 +1,313 @@
+
+
+===== src\answer_generator.py =====
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+# Türkçe T5 modeli (erişilebilir)
+tokenizer = AutoTokenizer.from_pretrained("cahya/t5-base-turkish-summarization")
+model = AutoModelForSeq2SeqLM.from_pretrained("cahya/t5-base-turkish-summarization")
+
+def generate_answer(question: str) -> str:
+    prompt = f"soru: {question}"
+    try:
+        inputs = tokenizer(prompt, return_tensors="pt", max_length=512, truncation=True)
+        outputs = model.generate(**inputs, max_new_tokens=150, do_sample=True, temperature=0.7)
+        return tokenizer.decode(outputs[0], skip_special_tokens=True)
+    except Exception as e:
+        return f"[Yorum üretilemedi]: {e}"
+
+
+===== src\data_preprocessing.py =====
+import os
+import re
+import json
+import fitz  # PyMuPDF
+import docx
+from bs4 import BeautifulSoup
+import pandas as pd
+from typing import List, Dict
+
+
+def load_synonyms(file_path: str) -> Dict[str, List[str]]:
+    df = pd.read_csv(file_path)
+    synonyms = {}
+    for _, row in df.iterrows():
+        values = [v.strip().lower() for v in row.dropna().values if isinstance(v, str)]
+        for word in values:
+            synonyms[word] = list(set(values) - {word})
+    return synonyms
+
+def expand_question_with_synonyms(question: str, synonyms: Dict[str, List[str]]) -> List[str]:
+    words = question.lower().split()
+    expanded = set([question.lower()])
+    for i, word in enumerate(words):
+        if word in synonyms:
+            for syn in synonyms[word]:
+                new_words = words[:i] + [syn] + words[i+1:]
+                expanded.add(' '.join(new_words))
+    return list(expanded)
+
+def extract_text_from_file(file_path: str) -> str:
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == ".pdf":
+        return extract_text_from_pdf(file_path)
+    elif ext == ".docx":
+        return extract_text_from_docx(file_path)
+    elif ext == ".txt":
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            return f.read()
+    elif ext == ".html":
+        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            soup = BeautifulSoup(f, "html.parser")
+            return soup.get_text()
+    return ""
+
+
+def extract_text_from_pdf(file_path: str) -> str:
+    doc = fitz.open(file_path)
+    return "\n".join([page.get_text() for page in doc])
+
+
+def extract_text_from_docx(file_path: str) -> str:
+    doc = docx.Document(file_path)
+    return "\n".join([p.text for p in doc.paragraphs])
+
+
+def segment_law_text(content: str, mevzuat_adi: str) -> List[Dict]:
+    madde_pattern = re.compile(r"(Madde\s+\d+[A-Za-z\d]*)[:\s]+", re.IGNORECASE)
+    matches = list(madde_pattern.finditer(content))
+    segments = []
+
+    if not matches:
+        madde_no = "Genel"
+        if "karar no" in content.lower():
+            madde_no = "Kurul Kararı"
+        return [{
+            "mevzuat_adi": mevzuat_adi,
+            "madde_no": madde_no,
+            "icerik": content.strip()
+        }]
+
+    for i in range(len(matches)):
+        start = matches[i].end()
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
+        madde_no = matches[i].group().strip().replace("Madde", "").strip(": ").strip()
+        icerik = content[start:end].strip()
+        if len(icerik) > 30:
+            segments.append({
+                "mevzuat_adi": mevzuat_adi,
+                "madde_no": madde_no,
+                "icerik": icerik
+            })
+    return segments
+
+
+def clean_text(text: str) -> str:
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def preprocess_raw_mevzuat(raw_dir: str, output_dir: str, log_path="data/logs/preprocess_log.xlsx"):
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+
+    log_data = []
+
+    for root, _, files in os.walk(raw_dir):
+        for filename in files:
+            path = os.path.join(root, filename)
+            ext = os.path.splitext(filename)[1].lower()
+            if ext not in [".pdf", ".docx", ".txt", ".html"]:
+                continue
+
+            base_name = os.path.basename(filename)
+            mevzuat_adi = (
+                base_name.replace(".pdf", "")
+                .replace(".docx", "")
+                .replace(".txt", "")
+                .replace(".html", "")
+                .replace("_", " ")
+                .replace("-", " ")
+                .title()
+            )
+
+            try:
+                content = extract_text_from_file(path)
+                if not content or len(content) < 100:
+                    log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": 0, "Durum": "Başarısız", "Gerekçe": "İçerik çok kısa"})
+                    continue
+
+                segments = segment_law_text(content, mevzuat_adi)
+                cleaned = [{**s, "icerik": clean_text(s["icerik"])} for s in segments]
+
+                if cleaned:
+                    with open(os.path.join(output_dir, f"{mevzuat_adi}.json"), "w", encoding="utf-8") as f:
+                        json.dump(cleaned, f, ensure_ascii=False, indent=2)
+                    log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": len(cleaned), "Durum": "Başarılı", "Gerekçe": ""})
+                else:
+                    log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": 0, "Durum": "Başarısız", "Gerekçe": "Hiç madde bulunamadı"})
+
+            except Exception as e:
+                log_data.append({"Dosya": filename, "Mevzuat Adı": mevzuat_adi, "Madde Sayısı": 0, "Durum": "Hata", "Gerekçe": str(e)})
+
+    df = pd.DataFrame(log_data)
+    df.to_excel(log_path, index=False)
+    print(f"[✅] Ön işleme tamamlandı. Log: {log_path}")
+
+
+===== src\embedder.py =====
+import os
+import json
+import pickle
+from typing import List, Dict
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+
+def generate_embeddings_from_processed(processed_dir: str, output_path: str):
+    from sentence_transformers import SentenceTransformer
+    import numpy as np
+    import pickle
+
+    model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+    corpus = []
+    metadata = []
+
+    for filename in os.listdir(processed_dir):
+        if not filename.endswith(".json"):
+            continue
+        with open(os.path.join(processed_dir, filename), "r", encoding="utf-8") as f:
+            items = json.load(f)
+            for item in items:
+                if not all(k in item for k in ("mevzuat_adi", "madde_no", "icerik")):
+                    continue  # KİK kararlarını atla
+                corpus.append(item["icerik"])
+                metadata.append({
+                    "mevzuat_adi": item["mevzuat_adi"],
+                    "madde_no": item["madde_no"],
+                    "icerik": item["icerik"]
+                })
+
+
+    print(f"[INFO] Embedding {len(corpus)} segments...")
+    embeddings = model.encode(corpus, show_progress_bar=True)
+
+    with open(output_path, "wb") as f:
+        pickle.dump((embeddings, metadata), f)
+
+    print(f"[INFO] Embeddings saved to {output_path}")
+
+
+
+===== src\model.py =====
+from typing import List, Dict
+
+def generate_answer(retrieved_docs: List[Dict], user_question: str) -> str:
+    response = []
+
+    response.append("\nSoru: " + user_question)
+    response.append("\n\nİlgili Mevzuat Maddeleri:\n")
+
+    for doc in retrieved_docs:
+        mevzuat = doc.get("mevzuat_adi", "")
+        madde = doc.get("madde_no", "")
+        icerik = doc.get("icerik", "")
+        sim = doc.get("similarity", 0)
+
+        response.append(f"📘 {mevzuat} - Madde {madde} (Benzerlik: {sim:.2f})\n{icerik}\n")
+
+    response.append("\n📌 Açıklama:\n")
+    response.append("Yukarıda belirtilen mevzuatlara göre, sorunuzla ilişkili olan maddeler yukarıda listelenmiştir. Bu maddeler çerçevesinde değerlendirme yapılabilir.")
+
+    response.append("\n\nLütfen aşağıdaki şekilde puanlama yapınız (1-5):")
+    response.append("\n1 - İlgisiz | 2 - Kısmen Alakalı | 3 - Orta | 4 - İyi | 5 - Çok İyi")
+
+    return "\n".join(response)
+
+===== src\retriever.py =====
+import pickle
+import numpy as np
+from typing import List, Dict, Tuple
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+
+
+def load_embeddings(path: str):
+    import pickle
+    with open(path, "rb") as f:
+        embeddings, metadata = pickle.load(f)
+    return embeddings, metadata
+
+
+
+def retrieve_top_k(question_variants, embeddings, metadata, k=3):
+    import numpy as np
+    from sentence_transformers import SentenceTransformer
+
+    model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+    question_embeddings = model.encode(question_variants, convert_to_numpy=True)
+    avg_question_embedding = np.mean(question_embeddings, axis=0)
+
+    similarities = np.dot(embeddings, avg_question_embedding) / (
+        np.linalg.norm(embeddings, axis=1) * np.linalg.norm(avg_question_embedding)
+    )
+    top_k_indices = np.argsort(similarities)[-k:][::-1]
+
+    top_k_items = [metadata[i] for i in top_k_indices if similarities[i] > 0.3]  # filtreleme
+    return top_k_items
+
+===== app\streamlit_app.py =====
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import streamlit as st
+from src.data_preprocessing import load_synonyms, expand_question_with_synonyms
+from src.retriever import load_embeddings, retrieve_top_k
+from src.answer_generator import generate_answer
+
+# Başlık ve tanıtım
+st.set_page_config(page_title="📘 İhale Mevzuat Asistanı", layout="wide")
+st.title("📘 İhale Mevzuat Asistanı")
+st.markdown("Sorduğunuz soruya mevzuata uygun yorumlarla cevap verir.\n")
+
+# 🔄 Verileri yükle
+EMBEDDING_PATH = "data/embeddings/ihale_embeddings.pkl"
+SYNONYM_PATH = "data/EsAnlamlilar.csv"
+
+try:
+    embeddings, metadata = load_embeddings(EMBEDDING_PATH)
+    synonyms = load_synonyms(SYNONYM_PATH)
+except Exception as e:
+    st.error(f"Veriler yüklenirken hata oluştu: {e}")
+    st.stop()
+
+# 🔍 Soru girişi
+soru = st.text_input("🔎 Sorunuzu girin:")
+
+if soru:
+    expanded = expand_question_with_synonyms(soru, synonyms)
+
+    with st.spinner("En uygun mevzuat maddeleri aranıyor..."):
+        results = retrieve_top_k(expanded, embeddings, metadata, k=3)
+
+    if not results:
+        st.warning("Soruya uygun mevzuat maddesi bulunamadı.")
+    else:
+        st.subheader("📄 Uygun Mevzuat Maddeleri")
+        for result in results:
+            mevzuat_adi = result.get("mevzuat_adi", "Bilinmiyor")
+            madde_no = result.get("madde_no", "—")
+            icerik = result.get("icerik", "İçerik bulunamadı.")
+
+            st.markdown(f"**{mevzuat_adi}** — Madde {madde_no}")
+            st.markdown(icerik)
+            st.markdown("---")
+
+    with st.spinner("🧠 Asistan yorumunu oluşturuyor..."):
+        yorum = generate_answer(soru)
+
+    st.subheader("🧾 Asistanın Yorumu")
+    st.markdown(yorum)
