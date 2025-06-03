@@ -3,10 +3,10 @@
 venv/
 
 # Veri Dosyaları
-#data/raw/
-#data/processed/
+data/raw/
+data/processed/
 #data/embeddings/
-#data/interactions/
+
 
 #Python Derleme ve Geçici Dosyalar
 pycache/

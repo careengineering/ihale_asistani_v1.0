@@ -1,49 +1,52 @@
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import streamlit as st
 from src.data_preprocessing import load_synonyms, expand_question_with_synonyms
 from src.retriever import load_embeddings, retrieve_top_k
-from src.model import generate_answer
-import os
+from src.answer_generator import generate_answer  # Artık sadece yorum döndürüyor
 
-st.set_page_config(page_title="İhale Asistanı", layout="wide")
-
-st.title("📘 İhale Asistanı")
-st.markdown("""
-İhale Asistanı, kullanıcıların ihale süreçlerine ilişkin sorularına ilgili mevzuat maddelerini bularak yanıt veren bir yapay zeka asistanıdır. Bu araç herkese açık verilerden ve ücretsiz modellerden faydalanır.
-
-🔔 **Uyarı:** Bu sistem hukuki danışmanlık amacı taşımaz. Verilen cevaplar mevzuatın öne çıkan maddelerine dayansa da nihai kararlar için resmi kaynaklar ve uzman görüşü esas alınmalıdır.
-""")
-
+# Ayarlar
 EMBEDDING_PATH = "data/embeddings/ihale_embeddings.pkl"
-SYNONYM_PATH = "data/EsAnlamlilar.csv"
+SYNONYM_PATH = "data/synonyms/EsAnlamlilar.csv"
+TOP_K = 3
 
-st.sidebar.header("Ayarlar")
-ihale_turu = st.sidebar.selectbox("İhale Türü", ["Genel", "Mal", "Hizmet", "Yapım", "Danışmanlık"])
+# Sayfa ayarı
+st.set_page_config(page_title="İhale Mevzuat Asistanı", layout="wide")
+st.title("📘 İhale Mevzuat Asistanı")
+st.markdown("Sorduğunuz soruya mevzuata uygun yorumlarla cevap verir.")
 
-soru = st.text_input("💬 Sorunuzu yazınız:", placeholder="Örn: diploma iş deneyim yerine geçer mi?")
+# Veri yükleme
+with st.spinner("Veriler yükleniyor..."):
+    try:
+        embeddings, metadata = load_embeddings(EMBEDDING_PATH)
+        synonyms = load_synonyms(SYNONYM_PATH) if os.path.exists(SYNONYM_PATH) else {}
+        model_loaded = True
+    except Exception as e:
+        st.error(f"Veriler yüklenirken hata oluştu: {e}")
+        model_loaded = False
 
-if st.button("🚀 Sorgula") and soru:
-    if not os.path.exists(EMBEDDING_PATH):
-        st.error("Embedding dosyası bulunamadı. Lütfen sistem yöneticisine başvurun.")
-    else:
-        with st.spinner("Veriler yükleniyor..."):
-            embeddings, metadata = load_embeddings(EMBEDDING_PATH)
-            synonyms = load_synonyms(SYNONYM_PATH)
-            expanded = expand_question_with_synonyms(soru, synonyms)
+# Soru al ve işleme başla
+if model_loaded:
+    soru = st.text_input("🔎 Sorunuzu girin:", placeholder="Örn: diploma iş deneyim yerine geçer mi?")
+    
+    if soru:
+        # Soru varyasyonları üret
+        expanded = expand_question_with_synonyms(soru, synonyms)
 
-        with st.spinner("En uygun mevzuat maddeleri aranıyor..."):
-            results = retrieve_top_k(expanded, embeddings, metadata, k=3)
+        # En uygun mevzuat maddelerini getir
+        with st.spinner("Uygun mevzuat maddeleri aranıyor..."):
+            results = retrieve_top_k(expanded, embeddings, metadata, k=TOP_K)
 
-        with st.spinner("Cevap oluşturuluyor..."):
-            cevap = generate_answer(results, soru)
+        # Mevzuat kaynaklarını göster
+        st.subheader("📄 Uygun Mevzuat Maddeleri")
+        for result in results:
+            st.markdown(f"### {result['mevzuat_adi']} - Madde {result['madde_no']}")
+            st.markdown(result['icerik'])
+            st.markdown("---")
 
-        st.markdown("---")
-        st.markdown(f"### 📄 Soru: `{soru}`")
-        st.markdown(cevap)
-
-        puan = st.radio("Bu cevabı nasıl puanlarsınız?", [1, 2, 3, 4, 5], horizontal=True)
-        st.success(f"Teşekkürler! {puan} puan verdiniz.")
-
+        # Asistan yorumu
+        st.subheader("🧾 Asistanın Yorumu")
+        with st.spinner("Cevap hazırlanıyor..."):
+            st.markdown(generate_answer(soru))

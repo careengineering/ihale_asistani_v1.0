@@ -6,10 +6,12 @@ from sentence_transformers import SentenceTransformer
 model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
 
 
-def load_embeddings(pickle_path: str) -> Tuple[np.ndarray, List[Dict]]:
-    with open(pickle_path, "rb") as f:
-        data = pickle.load(f)
-    return data["embeddings"], data["metadata"]
+def load_embeddings(path: str):
+    import pickle
+    with open(path, "rb") as f:
+        embeddings, metadata = pickle.load(f)
+    return embeddings, metadata
+
 
 
 def retrieve_top_k(question_variants: List[str], embeddings: np.ndarray, metadata: List[Dict], k: int = 3) -> List[Dict]:

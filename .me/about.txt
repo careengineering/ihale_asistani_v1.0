@@ -4,9 +4,10 @@ Kapsamı: Herkese açık bu nedenle ücretsiz model ve araçlar kullanılmalı.
 
 Dosya Mimarisi: structure.txt
 
-Yapay Zeka Modeli: data/raw içerisinde birçok doc, docx, pdf, txt, html vb veriler var. Bu dosyalarda ihale ile ilgili kurallar ve şartlar yer alıyor. 
+Yapay Zeka Modeli: data/raw içerisinde klasörlerde birçok doc, docx, pdf, txt, html vb veriler var. Bu dosyalarda ihale ile ilgili kurallar ve şartlar yer alıyor. 
 İhale “Bir işin kimin tarafından daha ucuz yapılacağının anlaşılması için istekliler arasında açılan fiyat kırma işi; eksiltme.” Şeklinde tanımlanmaktadır. 
-4 çeşit ihale çeşidi vardır. Mal, Hizmet, Yapım ve Danışmanlık. Her birinin kendi içinde farklılaşan mevzuatları vardır. 
+5 çeşit ihale çeşidi vardır. İstisna(3i)Mal, Hizmet, Yapım ve Danışmanlık. Her birinin kendi içinde farklılaşan mevzuatları vardır. 
+
 Başlığında Mal, Hizmet, Yapım ve Danışmanlık kelimesi bulunmayan mevzuatlar tüm ihalelerde geçerlidir. Bu nedenle sorunun hangi konu bazında aranacağını selecttion vb düğmeleri ile seçtireceğiz ki ilgili mevzuta aransın.
 Kanun, Yönetmelik, Tebliğ ve Esaslar içerisinde mevzuatın amacı, kapsamı, dayanağı ve tanımlar yer almaktadır. Farklı bölümlerde farklı konular ve kurallar anlatılmaktadır. 
 Kik kararları ise bu mevzuatların uygulanması sırasında düzenleyici karar olarak belirlenen konulardır. Metinden önce çoğunlukla gündem konusu belirtilir. Toplantı no gündem no katılan üye sayısı gibi bilgiler gereksizdir. Ama atıfta bulunurken karar tarihi ve karar no belirtilmelidir. 
@@ -40,21 +41,21 @@ Sistemin çalışma prensibinin şu şekilde olmasını istiyorum.
 Soru : "diploma iş deneyim belgesi yerine geçer mi?" (diploma, mezuniyet, mezuniyet belgesi gibi eşanlamlı kelimeler olabilir)
 
 Kaynaklar: 
-Kamu İhale Kanunu Madde 62:
-"...h) (Değişik: 20/11/2008-5812/24 md.) İş deneyimi bulunmayan mühendis veya mimarların, aldıkları lisans eğitimine uygun yapım işi ihalelerine başvurularında, toplam süresi onbeş yılı geçmemek kaydıyla mezuniyetlerinden sonra geçen her yıl, yüzyirmiikibinüçyüzseksenyedi Yeni Türk Lirası (İkimilyondokuzyüzaltmışbirbinyediyüzaltmışiki Türk Lirası)* olarak hesaplanmak üzere 10 uncu madde kapsamındaki benzer iş deneyimi olarak dikkate alınır. Bu süre iş deneyimi bulunan mimar ve mühendisler için uygulanmaz. Bu bent kapsamında elde edilen deneyim mühendis ve mimarın beş yıldır en az % 51 hissesine sahip olduğu  tüzel kişiler tarafından da kullanılabilir. ...."
+Kamu İhale Kanunu - Madde 62:
+"...h)İş deneyimi bulunmayan mühendis veya mimarların, aldıkları lisans eğitimine uygun yapım işi ihalelerine başvurularında, toplam süresi onbeş yılı geçmemek kaydıyla mezuniyetlerinden sonra geçen her yıl, yüzyirmiikibinüçyüzseksenyedi Yeni Türk Lirası (İkimilyondokuzyüzaltmışbirbinyediyüzaltmışiki Türk Lirası)* olarak hesaplanmak üzere 10 uncu madde kapsamındaki benzer iş deneyimi olarak dikkate alınır. Bu süre iş deneyimi bulunan mimar ve mühendisler için uygulanmaz. Bu bent kapsamında elde edilen deneyim mühendis ve mimarın beş yıldır en az % 51 hissesine sahip olduğu  tüzel kişiler tarafından da kullanılabilir. ...."
 
-Yapım İşleri İhaleleri Yönetmeliği Madde 39:
-"... (11) (Değişik: RG-3/7/2009-27277; Değişik: RG-7/6/2014-29023, yürürlük: 10/6/2014) Tüzel kişi tarafından iş deneyimini göstermek üzere, en az beş yıldır % 51 veya daha fazla hissesine sahip mimar veya mühendis ortağının mezuniyet belgesinin sunulması durumunda; ticaret ve sanayi odası/ticaret odası bünyesinde bulunan ticaret sicil memurlukları veya (Ek ibare: 12/06/2015-29384 R.G./1. md, Mülga ibare: 13/06/2019-30800 RG/ 4. md., yürürlük: 23/06/2019) yeminli mali müşavir ya da serbest muhasebeci mali müşavir tarafından, ilk ilan veya davet tarihinden sonra düzenlenen ve düzenlendiği tarihten geriye doğru son beş yıldır kesintisiz olarak bu şartın korunduğunu gösteren belgenin sunulması zorunludur.
+Yapım İşleri İhaleleri Yönetmeliği - Madde 39:
+"... (11) Tüzel kişi tarafından iş deneyimini göstermek üzere, en az beş yıldır % 51 veya daha fazla hissesine sahip mimar veya mühendis ortağının mezuniyet belgesinin sunulması durumunda; ticaret ve sanayi odası/ticaret odası bünyesinde bulunan ticaret sicil memurlukları veya (Ek ibare: 12/06/2015-29384 R.G./1. md, Mülga ibare: 13/06/2019-30800 RG/ 4. md., yürürlük: 23/06/2019) yeminli mali müşavir ya da serbest muhasebeci mali müşavir tarafından, ilk ilan veya davet tarihinden sonra düzenlenen ve düzenlendiği tarihten geriye doğru son beş yıldır kesintisiz olarak bu şartın korunduğunu gösteren belgenin sunulması zorunludur.
 (12) Mezuniyet belgelerinin iş deneyimini tevsik için sunulması durumunda; mezuniyetten sonra geçen sürenin onbeş yıldan fazlasının değerlendirmeye alınabilmesi için, başvuru veya teklif kapsamında mezuniyet belgesi sahibine ait yapım işine ilişkin bir iş deneyim belgesinin sunulması zorunludur..."
 
-Yapım İşleri İhaleleri Yönetmeliği Madde 48:
+Yapım İşleri İhaleleri Yönetmeliği - Madde 48:
 "...(8) Mühendis veya mimarların, aldıkları lisans eğitimine uygun yapım işleri ihalelerinde, iş deneyimi olarak mezuniyet belgelerini sunmaları durumunda;
 a) İş deneyimi bulunmayan mühendis veya mimarların; toplam süresi onbeş yılı geçmemek kaydıyla mezuniyetlerinden sonra geçen her yıl, Kanunun 62 nci maddesinin birinci fıkrasının (h) bendinde belirtilen tutar kadar, 
 b) İş deneyimi bulunan mühendis veya mimarların; onbeş yıllık sınırlamaya tabi tutulmaksızın, mezuniyetlerinden sonra geçen her yıl Kanunun 62 nci maddesinin birinci fıkrasının (h) bendinde belirtilen tutar kadar, 
 benzer iş deneyimi olarak dikkate alınır..."
 
 
-Cevap: Yukarıda yer alan mevzuat hükümleri doğrultusunda diplomanın iş deneyim belgesi yerine belirli koşullar dahilinde geçebileceği belirtilmektedir.
+Yorum: Yukarıda yer alan mevzuat hükümleri doğrultusunda diplomanın iş deneyim belgesi yerine belirli koşullar dahilinde geçebileceği belirtilmektedir.
 
 Puanlama:
 1...2...3....4...5

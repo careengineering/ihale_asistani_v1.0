@@ -1,0 +1,253 @@
+├── .git
+├── .gitignore
+├── .me
+│   ├── about.txt
+│   ├── notes.txt
+│   ├── output.py
+│   ├── soru1.txt
+│   ├── structure.txt
+│   └── tree.py
+├── .venv
+├── LICENSE
+├── README.md
+├── app
+│   ├── __init__.py
+│   ├── main.py
+│   └── streamlit_app.py
+├── data
+│   ├── EsAnlamlilar.csv
+│   ├── __init__.py
+│   ├── download_mevzuat
+│   │   ├── mevzuat.xlsx
+│   │   └── mevzuat_indir.py
+│   ├── embeddings
+│   │   └── ihale_embeddings.pkl
+│   ├── processed
+│   │   ├── 10- Sirket Bölünmesi.json
+│   │   ├── 103-MEB duyuruv2.json
+│   │   ├── 105.1- Devlet Su Isleri Kurum Görüsü.json
+│   │   ├── 116-Mevzuat Degisikligi  yayimlanacak.json
+│   │   ├── 12766.json
+│   │   ├── 12821.json
+│   │   ├── 12916.json
+│   │   ├── 12917.json
+│   │   ├── 12918.json
+│   │   ├── 12920.json
+│   │   ├── 13354.json
+│   │   ├── 134-Kisa Vadeli Sigorta.json
+│   │   ├── 15043.json
+│   │   ├── 158-tebligdegisikligi ve TL (1).json
+│   │   ├── 158-tebligdegisikligi ve TL.json
+│   │   ├── 16-  ISIO  9001.json
+│   │   ├── 193.json
+│   │   ├── 2010-DK.D-6 (1).json
+│   │   ├── 2010-DK.D-6.json
+│   │   ├── 2020_DK.D-239.json
+│   │   ├── 2020_DK.D-240.json
+│   │   ├── 2021-DK.D-229.json
+│   │   ├── 2021-DK.D-82.json
+│   │   ├── 2021.DK.D-282-Is Yönetim Belgesi.json
+│   │   ├── 2022-DK.D-213.json
+│   │   ├── 213.json
+│   │   ├── 21637,kentsel-tasarim-projeleri-yaklasik-maliyet-hesaplama-yontemi.json
+│   │   ├── 21637.json
+│   │   ├── 21644,koruma-amacli-imar-planlari-yaklasik-maliyet-hesaplama-yontemi.json
+│   │   ├── 21644.json
+│   │   ├── 229-Hisselerin Tamami  hamiline yazili pay senedi.json
+│   │   ├── 234-Yerli Gerçek ve Tüzel Kisilerin EKAP_a kaydi_(1).json
+│   │   ├── 234-Yerli Gerçek ve Tüzel Kisilerin EKAP_a kaydi_.json
+│   │   ├── 3065.json
+│   │   ├── 395-Santiye sefinin ayni zamanda yüklenici sirketin ortagi....json
+│   │   ├── 40666.json
+│   │   ├── 4712.json
+│   │   ├── 4713.json
+│   │   ├── 4714.json
+│   │   ├── 4734.json
+│   │   ├── 4735.json
+│   │   ├── 4857.json
+│   │   ├── 488.json
+│   │   ├── 5510.json
+│   │   ├── 62852,cevre-duzenleme-projesi-genel-teknik-sartnamesipdf.json
+│   │   ├── 62852.json
+│   │   ├── 62855,tescilli-tasinmaz-kultur-varliklarinin-projelerine-iliskin-genel-teknik-sartnamepdf.json
+│   │   ├── 62855.json
+│   │   ├── 62856,korunmasi-gerekli-doku-ve-sokaklari-sagliklastirma-projesi-yaklasik-maliyet-hesaplama-yontemipdf.json
+│   │   ├── 62856.json
+│   │   ├── 62857,korunmasi-gerekli-doku-ve-sokaklari-sagliklastirma-projesi-genel-teknik-sartnamesipdf.json
+│   │   ├── 62857.json
+│   │   ├── 62858,cevre-duzenleme-projesi-yaklasik-maliyet-hesaplama-yontemipdf.json
+│   │   ├── 62858.json
+│   │   ├── 6331.json
+│   │   ├── 6446.json
+│   │   ├── 6475.json
+│   │   ├── Bildirim DK.D-78.json
+│   │   ├── DKD-205-Duyuru Metni yayinlanacak.json
+│   │   ├── HİZMET İŞLERİ GENEL ŞARTNAMESİ.json
+│   │   ├── YAPIM İŞLERİ GENEL ŞARTNAMESİ.json
+│   │   ├── nan_hizmet_almlarnda_uygulanacak_fiyat_farkna_iliskin_esaslar.json
+│   │   ├── nan_mal_almlarnda_uygulanacak_fiyat_farkna_iliskin_esaslar.json
+│   │   └── nan_yapm_islerinde_uygulanacak_fiyat_farkna_iliskin_esaslar.json
+│   └── raw
+│       ├── esaslar
+│       │   ├── nan_hizmet_almlarnda_uygulanacak_fiyat_farkna_iliskin_esaslar.docx
+│       │   ├── nan_mal_almlarnda_uygulanacak_fiyat_farkna_iliskin_esaslar.docx
+│       │   └── nan_yapm_islerinde_uygulanacak_fiyat_farkna_iliskin_esaslar.docx
+│       ├── istisna
+│       │   ├── 21637.docx
+│       │   ├── 21641.docx
+│       │   ├── 21644.docx
+│       │   ├── 62852.pdf
+│       │   ├── 62853.pdf
+│       │   ├── 62854.pdf
+│       │   ├── 62855.pdf
+│       │   ├── 62856.pdf
+│       │   ├── 62857.pdf
+│       │   └── 62858.pdf
+│       ├── kanun
+│       │   ├── 193.pdf
+│       │   ├── 213.pdf
+│       │   ├── 3065.pdf
+│       │   ├── 4734.pdf
+│       │   ├── 4735.pdf
+│       │   ├── 4857.pdf
+│       │   ├── 488.pdf
+│       │   ├── 5510.pdf
+│       │   ├── 6331.pdf
+│       │   ├── 6446.pdf
+│       │   └── 6475.pdf
+│       ├── kik_kararlari
+│       │   ├── 10- Sirket Bölünmesi.pdf
+│       │   ├── 101-4735 Sayili Kamu Ihale Sözls. Kanun. Geçici 5 inci Madd. Uyg. Iliskin Es. Dair Tereddütlerin Gid..pdf
+│       │   ├── 103-MEB duyuruv2.pdf
+│       │   ├── 105-4734 sayili Kanun 13.Mad.(b)bendi._.pdf
+│       │   ├── 105-elektrikalimi.pdf
+│       │   ├── 105.1- Devlet Su Isleri Kurum Görüsü.pdf
+│       │   ├── 106-Kismi teklife  açik olarrak yapilan  ihalelerde  sözlesme yapilmamasi.pdf
+│       │   ├── 11- Asgari  Ücret  mücbir sebep.pdf
+│       │   ├── 113-696 sayili Olaganüstü Hal Kap.pdf
+│       │   ├── 114-4735 sayili  KI sözlesmesi Kan. 5. Mad. uygulanmasi iliskin.pdf
+│       │   ├── 116-Mevzuat Degisikligi  yayimlanacak.pdf
+│       │   ├── 13-  6_K_R Katsayisi.pdf
+│       │   ├── 134-Kisa Vadeli Sigorta.pdf
+│       │   ├── 143- Sirket Birlesmeleri (1).pdf
+│       │   ├── 143- Sirket Birlesmeleri.pdf
+│       │   ├── 145-4735 sayili KI Kanununun geçiçi 5. mad. uygulanmasi.pdf
+│       │   ├── 145-Dogrudan temin kapsaminda yapilan alimlar.pdf
+│       │   ├── 154-Yapim Isleri  Uygulama  Yönetmeligi yayinlanacak.pdf
+│       │   ├── 158-tebligdegisikligi ve TL (1).pdf
+│       │   ├── 158-tebligdegisikligi ve TL.pdf
+│       │   ├── 16-  ISIO  9001.pdf
+│       │   ├── 161- E  imza Kuruma  Yapilan  Basvurular.pdf
+│       │   ├── 169- 4735 sayili Kanunun Geçiçi 5. Maddesinin  Uygulanmasina Iliskin Tereddütlerin Giderilmesi.pdf
+│       │   ├── 171- 4735 sayili Kanunun Geçiçi 6. Maddesinin  Uygulanmasina Iliskin Tereddütlerin Giderilmesi.pdf
+│       │   ├── 179- mezuniyetten sonra geçen süre.pdf
+│       │   ├── 187-696 sayili Olaganüstü Hal Kapsamindaki Düzn..pdf
+│       │   ├── 19- 696 sayili  KHK  düzelleme  yayinlanacak.pdf
+│       │   ├── 200- 4735 sayili Kanunun Geçiçi 6. Maddesinin  Uygulanmasina Iliskin Tereddütlerin Giderilmesi_Yayimlanacak Versiyon.pdf
+│       │   ├── 201- 4735 sayili Kanunun Geçiçi 5. Maddesinin  Uygulanmasina Iliskin Tereddütlerin Giderilmesi_Yayimlanacak Versiyon.pdf
+│       │   ├── 2010-135.pdf
+│       │   ├── 2010-58.pdf
+│       │   ├── 2010-DK.D-6 (1).pdf
+│       │   ├── 2010-DK.D-6.pdf
+│       │   ├── 2017-DK.D-300.pdf
+│       │   ├── 2018-DK.D-132 (2).pdf
+│       │   ├── 2018-DK.D-17.pdf
+│       │   ├── 2018-DK.D-302-Elektrik enerji alimlari fiyat farki uygulamasi.pdf
+│       │   ├── 2018-DKD-12-internet versiyonu.pdf
+│       │   ├── 2018DK.D-405.pdf
+│       │   ├── 2020-DK.D-134.pdf
+│       │   ├── 2020-DK.D-17.pdf
+│       │   ├── 2020-DK.D-219.pdf
+│       │   ├── 2020-DK.D-222.pdf
+│       │   ├── 2020DK.D-272.pdf
+│       │   ├── 2020_DK.D-239.pdf
+│       │   ├── 2020_DK.D-240.pdf
+│       │   ├── 2021-DK.D-229.pdf
+│       │   ├── 2021-DK.D-82.pdf
+│       │   ├── 2021.DK.D-174 - 2020-DK.D-417 sayili Kurul Kararinin iptali.pdf
+│       │   ├── 2021.DK.D-20-Sinir Deger Katsayisi.pdf
+│       │   ├── 2021.DK.D-282-Is Yönetim Belgesi.pdf
+│       │   ├── 2021.DK.D-283- 6102 sayili Türk TTK_nin 373. maddesinde yapilan degisiklik(1).pdf
+│       │   ├── 2021.DK.D-283- 6102 sayili Türk TTK_nin 373. maddesinde yapilan degisiklik.pdf
+│       │   ├── 2021.DK.D-352-2020-DK.D-56 Kurul Karainin iptali.pdf
+│       │   ├── 2022 DKD 396 yayimlanacak versiyon (00000003).pdf
+│       │   ├── 2022-.DK.D-230 Elektrik Alim  Ihaleleri.pdf
+│       │   ├── 2022-DK.D-213.pdf
+│       │   ├── 2022-DK.D-268-4735 sayili Kanunun Geçiçi 6. Maddesinin  Uygulanmasina Iliskin Tereddütlerin Giderilmesi.pdf
+│       │   ├── 2022.DK.D-29-Asiri düsük teklif.pdf
+│       │   ├── 2022.DK.D-30- Sinir Deger Tespit Katsayisi.pdf
+│       │   ├── 2022_DK.D-129.pdf
+│       │   ├── 2023_DK.D-27 (00000003).pdf
+│       │   ├── 21-2013-DK.D-7 sayili  KIK kararinin  Y.D.pdf
+│       │   ├── 214-Sözlesme imzalanacak son günün belirlenmesi.pdf
+│       │   ├── 228- 4735 sayili Kanunun Geçiçi 6. Mad.  Uygu.  Iliskin Tereddütlerin Giderilmesi.pdf
+│       │   ├── 229-Hisselerin Tamami  hamiline yazili pay senedi.pdf
+│       │   ├── 23-4735 sayili Kanunun 17 ve 18  mad..pdf
+│       │   ├── 234-Yerli Gerçek ve Tüzel Kisilerin EKAP_a kaydi_(1).pdf
+│       │   ├── 234-Yerli Gerçek ve Tüzel Kisilerin EKAP_a kaydi_.pdf
+│       │   ├── 24-Sinir Deger Tespit  Katsayisinin Belirlenmesi (1).pdf
+│       │   ├── 24-Sinir Deger Tespit  Katsayisinin Belirlenmesi.pdf
+│       │   ├── 246- 4735 sayili Kanunun Geçiçi 6. Mad.  Uygu.  Iliskin Tereddütlerin Giderilmesi_.pdf
+│       │   ├── 263-Is Deneyim Belgesi.pdf
+│       │   ├── 27- kirsal motorin.pdf
+│       │   ├── 28- EKAPta yasanan teknik sorunlar nedeniyle sistem üzerinde islem yapilamamasi.pdf
+│       │   ├── 292-4735 Sayili Kamu Ihale Söz. 6. Madde.pdf
+│       │   ├── 308- 4735 sayili Kanunun Geçiçi 6. Mad.  Uygu.  Iliskin Tereddütlerin Giderilmesi.pdf
+│       │   ├── 31- Esit Teklif - Vergi mat. mali zararin net sat. Oran. Büy..pdf
+│       │   ├── 336-4735_sayili_Kanunun_Geçiçi_5_ve_6_Mad_Uygu_Iliskin_Tereddütlerin_Gid..pdf
+│       │   ├── 337-Is Deneyim Belg..pdf
+│       │   ├── 348-Mücbir Sebep.pdf
+│       │   ├── 357-Yabanci gerçek ve tüzel Kisi. Elektronil Kamu Alimlari Plat..pdf
+│       │   ├── 373- Doküman Indirme Islemlerinde E-imza Yerine Kullanilacak Yöntemlerin Belirlenmesi.pdf
+│       │   ├── 380- 4735 sayili Kanunun Geçiçi 6. Mad.  Uygu.  Iliskin Tereddütlerin Giderilmesi.pdf
+│       │   ├── 395-Santiye sefinin ayni zamanda yüklenici sirketin ortagi....pdf
+│       │   ├── 397- Hizmet alimi ihalelerinde esit tekliflerin puanlamasi.pdf
+│       │   ├── 40- Kesin Teminat Tutarindan Fazla Oldugu ve Teminatin Gelir Kaydedilmesi.pdf
+│       │   ├── 48-  4735 sayili Kamu Ihale  Sözlesmeleri Kanununun Geçici 6. mad  uygulanmasi.pdf
+│       │   ├── 48-Özel Tüketim Vergisi.pdf
+│       │   ├── 52-Danistay 13. Dairesi Is Deneyim Belg..pdf
+│       │   ├── 56- Asiri Düsük Teklif Sorgulamasi Yapilmayacak Hizmetler.pdf
+│       │   ├── 59- Gecikme  cezasi.pdf
+│       │   ├── 61-TEFE ve ÜFE_nin kaldirilarak YI-ÜFE_nin yürürlüge girmesi ile fiyat farki hesabinin ne sekilde yapilacagi(1).pdf
+│       │   ├── 61-TEFE ve ÜFE_nin kaldirilarak YI-ÜFE_nin yürürlüge girmesi ile fiyat farki hesabinin ne sekilde yapilacagi.pdf
+│       │   ├── 79-13.04.2022 tarihli DK.D-129  sayili kararrin iptali  ve YD. karari.pdf
+│       │   ├── 86- ÖTV Fiyat  Farki.pdf
+│       │   ├── 94-4735 Kamu Ihale Sözls. Kann Geçici 5 inci Madd. Uyg. Iliskin Esaslara Dair Teredd. Gid..pdf
+│       │   ├── 96.pdf
+│       │   ├── 98-Tibbi literatür.pdf
+│       │   ├── Bildirim DK.D-78.pdf
+│       │   ├── DK.D 104 (2).pdf
+│       │   ├── DK.D-320 DÜZELTILMIS HALI.pdf
+│       │   ├── DKD 338 yayimlanacak.pdf
+│       │   ├── DKD-205-Duyuru Metni yayinlanacak.pdf
+│       │   ├── DKD-467   4735 Sayili KI Sözlesmesi  geçici 6. mad..pdf
+│       │   ├── DKD-468 Ihale dökümaninda fiyat farki.pdf
+│       │   ├── DKD-470  Yeni Is kalemi içerisindeki girdilerinfiyat farki.pdf
+│       │   └── Is sagligi ve güvenligi hizmetleri - 696 sayili KHK.pdf
+│       ├── sartname
+│       │   ├── HİZMET İŞLERİ GENEL ŞARTNAMESİ.docx
+│       │   └── YAPIM İŞLERİ GENEL ŞARTNAMESİ.docx
+│       ├── teblig
+│       │   ├── 12821.pdf
+│       │   ├── 13354.pdf
+│       │   ├── 15043.docx
+│       │   └── 40666.pdf
+│       └── yonetmelik
+│           ├── 12766.pdf
+│           ├── 12916.pdf
+│           ├── 12917.pdf
+│           ├── 12918.pdf
+│           ├── 12920.pdf
+│           ├── 4712.pdf
+│           ├── 4713.pdf
+│           └── 4714.pdf
+├── directory_structure.txt
+├── requirements.txt
+├── run_project.sh
+└── src
+    ├── __init__.py
+    ├── __pycache__
+    ├── data_preprocessing.py
+    ├── embedder.py
+    ├── model.py
+    └── retriever.py

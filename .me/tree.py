@@ -11,19 +11,29 @@ def load_gitignore(path):
         lines = f.readlines()
     return PathSpec.from_lines(GitWildMatchPattern, lines)
 
+# İçeriği atlanacak klasörler (yalnızca isimlerini göstereceğiz)
+skip_content_dirs = ['.git', '.venv']
+
 # Klasör yapısını oku ve ignore edilenleri atla
 def generate_tree(path, spec, prefix=''):
     tree_str = ''
     entries = sorted(os.listdir(path))
-    for index, entry in enumerate(entries):
+    filtered_entries = []
+    # Filtrelenmiş girişler için ignore ve skip kontrolü
+    for entry in entries:
         full_path = os.path.join(path, entry)
         relative_path = os.path.relpath(full_path, start='.')
         if spec.match_file(relative_path):
             continue
-        connector = '└── ' if index == len(entries) - 1 else '├── '
+        filtered_entries.append(entry)
+
+    for index, entry in enumerate(filtered_entries):
+        full_path = os.path.join(path, entry)
+        connector = '└── ' if index == len(filtered_entries) - 1 else '├── '
         tree_str += f"{prefix}{connector}{entry}\n"
-        if os.path.isdir(full_path):
-            extension = '    ' if index == len(entries) - 1 else '│   '
+        # Eğer klasör ve içeriği atlanacak klasörler listesinde değilse içeriği göster
+        if os.path.isdir(full_path) and entry not in skip_content_dirs:
+            extension = '    ' if index == len(filtered_entries) - 1 else '│   '
             tree_str += generate_tree(full_path, spec, prefix + extension)
     return tree_str
 
@@ -33,7 +43,9 @@ spec = load_gitignore(base_path)
 tree_output = generate_tree(base_path, spec)
 
 # Sonucu dosyaya yaz
-with open('directory_structure.txt', 'w', encoding='utf-8') as f:
+output_file_path = os.path.join(os.getcwd(), 'directory_structure.txt')
+with open(output_file_path, 'w', encoding='utf-8') as f:
     f.write(tree_output)
 
-print("Klasör yapısı ('.gitignore' dikkate alınarak) 'directory_structure.txt' dosyasına yazıldı.")
+print(f"Klasör yapısı ('.gitignore' dikkate alınarak) '{output_file_path}' dosyasına yazıldı.")
+
